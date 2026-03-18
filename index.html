@@ -3,236 +3,240 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🔱 G-GHOST | SORA 2 RECEIVER V17.5</title>
+    <title>🔱 G-GHOST | TOTAL RECALL V20.0</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        :root { --yt-red: #FF0000; --bg: #0b0b0b; --card: #161616; --text: #ffffff; --neon: #42FDFC; --dim: #888; --live: #00ff41; }
-        body { background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; margin: 0; padding-bottom: 120px; overflow-x: hidden; }
-
-        /* AppBar & UI */
+        :root { --yt-red: #FF0000; --bg: #0b0b0b; --card: #161616; --text: #ffffff; --neon: #42FDFC; --gold: #FFD700; --live: #00ff41; }
+        body { background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; margin: 0; padding-bottom: 150px; overflow-x: hidden; }
+        
         .app-bar { background: var(--bg); padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #222; }
-        .logo { font-size: 20px; font-weight: bold; letter-spacing: -1px; display: flex; align-items: center; gap: 8px; }
-        .logo span { background: var(--yt-red); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
-        .live-dot { width: 8px; height: 8px; background: var(--live); border-radius: 50%; animation: pulse 1s infinite; }
+        .logo { font-size: 18px; font-weight: bold; color: var(--neon); letter-spacing: -1px; }
+        .badge { background: var(--yt-red); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px; }
         
-        .header-actions { display: flex; gap: 15px; align-items: center; }
-        .icon-btn { background: none; border: none; color: #fff; font-size: 22px; cursor: pointer; position: relative; padding: 5px; }
-        .badge { position: absolute; top: -2px; right: -2px; background: var(--neon); color: #000; font-size: 10px; border-radius: 50%; padding: 2px 5px; font-weight: bold; }
+        #active-task-bar { background: #1a1a1a; padding: 8px 15px; border-bottom: 1px solid var(--neon); display: flex; font-size: 10px; color: var(--neon); font-weight: bold; justify-content: space-between; }
 
-        .search-container { padding: 10px 15px; display: none; background: var(--bg); position: sticky; top: 56px; z-index: 999; }
-        #search-input { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 25px; outline: none; box-sizing: border-box; }
-
-        /* Task Monitor Bar */
-        #active-task-bar { background: #1a1a1a; padding: 10px 15px; border-bottom: 1px solid var(--neon); display: none; align-items: center; gap: 15px; }
-        .task-info { font-size: 11px; color: var(--neon); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
-        /* Grid System */
-        #video-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; padding: 15px; }
-        .video-card { position: relative; background: var(--card); border-radius: 12px; overflow: hidden; transition: 0.3s; cursor: pointer; border: 1px solid #222; animation: fadeIn 0.5s ease; }
-        .video-card.selected { border-color: var(--neon); box-shadow: 0 0 15px var(--neon); transform: scale(0.98); }
+        #video-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 10px; }
+        .video-card { position: relative; background: var(--card); border-radius: 12px; overflow: hidden; border: 2px solid #222; transition: 0.2s; cursor: pointer; }
+        .video-card.selected { border-color: var(--neon); box-shadow: 0 0 15px var(--neon); transform: scale(0.97); }
+        .is-downloaded { border-color: var(--live); }
+        .is-downloaded::before { content: "✅ LOOTED"; position: absolute; top: 5px; left: 5px; background: var(--live); color: #000; font-size: 8px; font-weight: bold; padding: 2px 5px; border-radius: 4px; z-index: 10; }
         
-        .downloaded-badge { position: absolute; top: 8px; right: 8px; background: var(--neon); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; display: none; z-index: 10; }
-        .is-downloaded .downloaded-badge { display: block; }
-        .is-downloaded .thumb-img { opacity: 0.4; }
-
-        .thumb-container { width: 100%; aspect-ratio: 16/9; background: #000; overflow: hidden; position: relative; }
+        .thumb-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; overflow: hidden; }
         .thumb-img { width: 100%; height: 100%; object-fit: cover; }
-        .video-meta { padding: 10px; font-size: 12px; color: #fff; line-height: 1.4; height: 34px; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
-        .node-tag { font-size: 9px; color: var(--dim); padding: 0 10px 8px 10px; }
-
-        /* Overlays */
+        .video-meta { padding: 8px; font-size: 10px; color: #eee; height: 35px; overflow: hidden; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
+        
         .full-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: none; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        .overlay-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        #progress-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; }
+        .pg-bar { width: 80%; background:#222; height:10px; border-radius:10px; overflow:hidden; margin: 20px 0; border: 1px solid #333; }
+        .pg-fill { width: 0%; height: 100%; background: var(--neon); transition: 0.4s; box-shadow: 0 0 15px var(--neon); }
         
-        #progress-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .pg-bar-container { width: 100%; background:#222; height:8px; border-radius:10px; margin:20px 0; overflow:hidden; }
-        .pg-bar { width: 0%; height: 100%; background: var(--neon); transition: 0.4s; box-shadow: 0 0 20px var(--neon); }
+        .btn-main { background: var(--neon); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase; }
+        .search-container { padding: 10px; background: #000; }
+        #search-input { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; outline: none; box-sizing: border-box; }
         
-        .btn-main { background: var(--neon); color: #000; border: none; padding: 14px 24px; border-radius: 10px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .btn-main:active { transform: scale(0.95); }
-
-        .q-item { background: #111; padding: 10px; border-radius: 8px; margin-bottom: 10px; font-size: 11px; display: flex; justify-content: space-between; align-items: center; }
-        
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        #load-more-sentinel { text-align: center; padding: 40px; font-size: 10px; color: #444; font-weight: bold; letter-spacing: 2px; }
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
 
 <div class="app-bar">
-    <div class="logo"><div class="live-dot"></div> G-GHOST <span>ZIP V17.5</span></div>
-    <div class="header-actions">
-        <button class="icon-btn" onclick="toggleSearch()">🔍</button>
-        <button class="icon-btn" onclick="openOverlay('queue-overlay')">📥 <span id="q-count" class="badge">0</span></button>
-        <button class="icon-btn" onclick="openOverlay('history-overlay')">📜</button>
+    <div class="logo">🔱 G-GHOST <span class="badge">TOTAL RECALL</span></div>
+    <div style="display:flex; gap:15px;">
+        <button onclick="toggleSearch()" style="background:none; border:none; color:white; font-size:20px;">🔍</button>
+        <button onclick="openOverlay('queue-overlay')" style="background:none; border:none; color:white; font-size:20px;">📥 <span id="q-count" style="font-size:12px; color:var(--neon); font-weight:bold;">0</span></button>
     </div>
 </div>
 
 <div id="active-task-bar">
-    <div class="task-info" id="task-text">📡 Syncing with Vault...</div>
+    <span>📡 VAULT STATUS: SCANNING...</span>
+    <span id="total-count" style="color:var(--gold)">0 ASSETS</span>
 </div>
 
-<div id="search-box" class="search-container">
-    <input type="text" id="search-input" placeholder="Search prompts or nodes..." oninput="triggerSearch()">
+<div id="search-box" class="search-container" style="display:none;">
+    <input type="text" id="search-input" placeholder="Search prompts or IDs..." oninput="renderView()">
 </div>
 
 <div id="video-feed"></div>
-<div id="load-more-sentinel" style="text-align:center; padding:20px; font-size:10px; color:var(--neon);">SCANNING VAULT...</div>
+<div id="load-more-sentinel">END OF DATABASE</div>
 
 <div id="progress-overlay">
-    <div style="width:85%; max-width:400px;">
-        <h2 id="pg-title" style="color:white; letter-spacing:1px;">🔱 PACKING ZIP LOOT...</h2>
-        <div class="pg-bar-container"><div id="pg-bar" class="pg-bar"></div></div>
-        <div id="pg-percent" style="font-size:36px; color:var(--neon); font-weight:900;">0%</div>
-        <p id="pg-status" style="font-size:10px; color:#666; margin-top:10px;">Fetching assets...</p>
-    </div>
+    <h2 style="color:white; letter-spacing:2px;">🔱 HARVESTING ASSETS</h2>
+    <div class="pg-bar"><div id="pg-fill" class="pg-fill"></div></div>
+    <div id="pg-percent" style="font-size:45px; color:var(--neon); font-weight:900;">0%</div>
+    <p id="pg-status" style="font-size:11px; color:var(--gold); font-family:monospace;"></p>
 </div>
 
 <div id="queue-overlay" class="full-overlay">
-    <div class="overlay-header"><h2>Batch Queue</h2><button class="btn-main" onclick="closeOverlay('queue-overlay')">CLOSE</button></div>
-    <div id="queue-list"></div>
-    <button class="btn-main" id="zip-btn" style="width:100%; margin-top:20px; background:orange;" onclick="downloadZip()">📥 DOWNLOAD AS ZIP</button>
-    <button class="btn-main" style="width:100%; margin-top:10px; background:#222; color:#fff;" onclick="clearQueue()">CLEAR ALL</button>
-</div>
-
-<div id="history-overlay" class="full-overlay">
-    <div class="overlay-header"><h2>Looted History</h2><button class="btn-main" onclick="closeOverlay('history-overlay')">BACK</button></div>
-    <div id="history-list"></div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #222; padding-bottom:10px;">
+        <h2 style="color:var(--neon)">Selected Loot</h2>
+        <button onclick="closeOverlay('queue-overlay')" style="background:#222; color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold;">BACK</button>
+    </div>
+    <div id="queue-list" style="margin-bottom:20px;"></div>
+    <button class="btn-main" style="background:linear-gradient(to right, #ff8c00, #ff4500);" onclick="downloadZip()">📥 START ZIP DOWNLOAD</button>
+    <button class="btn-main" style="background:#111; color:#555; margin-top:10px; border:1px solid #222;" onclick="clearQueue()">CLEAR ALL SELECTIONS</button>
 </div>
 
 <script>
-    const FB_BASE = "https://hat-e9d2d-default-rtdb.firebaseio.com/sora_vault";
-    let allVaultItems = [];
-    let displayedItems = [];
-    let itemsPerPage = 24;
-    let currentPage = 1;
+    const FB_URL = "https://hat-e9d2d-default-rtdb.firebaseio.com/sora_vault.json";
+    let masterData = [];
     let queue = [];
-    let history = JSON.parse(localStorage.getItem('ghost_history_v17')) || [];
+    let history = JSON.parse(localStorage.getItem('ghost_history_v20')) || [];
 
-    async function startReceiver() {
-        const poll = async () => {
-            try {
-                const res = await fetch(`${FB_BASE}/assets.json?nocache=${Date.now()}`);
-                const data = await res.json();
-                if(!data) return;
-                const newItems = Object.keys(data).reverse().map(id => ({ id, ...data[id] }));
-                if(newItems.length !== allVaultItems.length) {
-                    allVaultItems = newItems;
-                    renderInitialBatch();
+    // 🔱 1. ULTRA-DEEP SCAN ENGINE
+    async function refreshData() {
+        try {
+            const res = await fetch(`${FB_URL}?nocache=${Date.now()}`);
+            const data = await res.json();
+            if(!data) return;
+
+            let tempStore = [];
+
+            // Recursive function to find all objects that look like video data
+            function deepSearch(obj) {
+                for (let key in obj) {
+                    let item = obj[key];
+                    if (item && typeof item === 'object') {
+                        // If it has a video link, it's a target
+                        if (item.clean || item.original_url || item.raw_video_url || item.original) {
+                            tempStore.push({
+                                id: key,
+                                clean: item.clean || item.original_url || item.raw_video_url || item.original,
+                                thumb: item.thumb || item.thumbnailUrl || '',
+                                prompt: item.prompt || item.title || 'Untitled_Ghost_Asset',
+                                time: item.timestamp || item.time || 0
+                            });
+                        } else {
+                            deepSearch(item);
+                        }
+                    }
                 }
-            } catch (e) {}
-        };
-        setInterval(poll, 5000);
-        poll();
+            }
+
+            deepSearch(data);
+
+            // Filter duplicates by video link
+            const unique = [];
+            const map = new Map();
+            for (const item of tempStore) {
+                if(!map.has(item.clean)){
+                    map.set(item.clean, true);
+                    unique.push(item);
+                }
+            }
+
+            // Sort newest first
+            masterData = unique.sort((a,b) => b.time - a.time);
+            document.getElementById('total-count').innerText = masterData.length + " ASSETS";
+            renderView();
+        } catch (e) { console.error("Portal Error"); }
     }
 
-    function renderInitialBatch() {
+    // 🔱 2. RENDER ENGINE (NO LIMITS)
+    function renderView() {
         const query = document.getElementById('search-input').value.toLowerCase();
-        let filtered = allVaultItems;
-        if(query) filtered = allVaultItems.filter(i => (i.prompt || '').toLowerCase().includes(query));
-        
-        currentPage = 1;
-        displayedItems = filtered.slice(0, itemsPerPage);
         const feed = document.getElementById('video-feed');
-        feed.innerHTML = "";
-        displayedItems.forEach(item => feed.appendChild(createCard(item)));
-    }
+        
+        let filtered = masterData;
+        if(query) {
+            filtered = masterData.filter(i => i.prompt.toLowerCase().includes(query) || i.id.toLowerCase().includes(query));
+        }
 
-    function createCard(item) {
-        const isDone = history.some(h => h.id === item.id);
-        const div = document.createElement('div');
-        div.className = `video-card ${isDone ? 'is-downloaded' : ''}`;
-        div.id = `card-${item.id}`;
-        div.innerHTML = `
-            <div class="downloaded-badge">LOOTED</div>
-            <div class="thumb-container"><img class="thumb-img" src="${item.thumb || ''}" loading="lazy"></div>
-            <div class="video-meta">${item.prompt || 'Untitled Ghost'}</div>
-            <div class="node-tag">NODE: ${item.node || 'Ghost'}</div>
-        `;
-        div.onclick = () => toggleSelect(item);
-        return div;
+        feed.innerHTML = "";
+        filtered.forEach(item => {
+            const isDone = history.includes(item.clean);
+            const isSelected = queue.some(q => q.clean === item.clean);
+            
+            const card = document.createElement('div');
+            card.className = `video-card ${isDone ? 'is-downloaded' : ''} ${isSelected ? 'selected' : ''}`;
+            card.id = `card-${item.id}`;
+            card.innerHTML = `
+                <div class="thumb-container">
+                    <img class="thumb-img" src="${item.thumb || 'https://via.placeholder.com/300x169/111/42FDFC?text=Sora_2_Asset'}" loading="lazy">
+                </div>
+                <div class="video-meta">${item.prompt}</div>
+            `;
+            card.onclick = () => toggleSelect(item);
+            feed.appendChild(card);
+        });
     }
 
     function toggleSelect(item) {
-        const idx = queue.findIndex(q => q.id === item.id);
-        const el = document.getElementById(`card-${item.id}`);
+        const idx = queue.findIndex(q => q.clean === item.clean);
         if(idx > -1) {
             queue.splice(idx, 1);
-            el.classList.remove('selected');
         } else {
             queue.push(item);
-            el.classList.add('selected');
         }
         document.getElementById('q-count').innerText = queue.length;
-        renderQueue();
+        renderView(); // Refresh visual state
+        renderQueueList();
     }
 
-    function renderQueue() {
+    function renderQueueList() {
         const list = document.getElementById('queue-list');
         list.innerHTML = queue.map(i => `
-            <div class="q-item"><span>${(i.prompt || 'Ghost').substring(0,30)}...</span> <b style="color:cyan">READY</b></div>
+            <div style="background:#111; padding:10px; border-radius:8px; margin-bottom:5px; font-size:11px; border-left:3px solid var(--neon)">
+                ${i.prompt.substring(0,50)}...
+            </div>
         `).join('');
     }
 
-    // 🔱 ZIP MASTER ENGINE
+    // 🔱 3. ZIP HARVESTER
     async function downloadZip() {
-        if(queue.length === 0) return alert("Queue empty!");
-        
+        if(queue.length === 0) return;
         const zip = new JSZip();
-        const progress = document.getElementById('progress-overlay');
-        const bar = document.getElementById('pg-bar');
+        const overlay = document.getElementById('progress-overlay');
+        const fill = document.getElementById('pg-fill');
         const percent = document.getElementById('pg-percent');
         const status = document.getElementById('pg-status');
         
-        progress.style.display = 'flex';
+        overlay.style.display = 'flex';
         closeOverlay('queue-overlay');
 
         for(let i=0; i < queue.length; i++) {
             const item = queue[i];
-            status.innerText = `Fetching: ${item.prompt?.substring(0,20)}...`;
-            
+            status.innerText = `FETCHING: ${i+1}/${queue.length}`;
             try {
                 const response = await fetch(item.clean);
                 const blob = await response.blob();
-                const fileName = `ghost_${i}_${Date.now()}.mp4`;
-                zip.file(fileName, blob);
+                // Clean filename
+                let safeName = item.prompt.substring(0,20).replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                zip.file(`${safeName}_${i}.mp4`, blob);
                 
-                // Update Progress
                 let p = Math.round(((i + 1) / queue.length) * 100);
-                bar.style.width = p + '%';
+                fill.style.width = p + '%';
                 percent.innerText = p + '%';
-            } catch (e) { console.log("Failed to fetch asset"); }
+            } catch (e) { console.log("Fetch failed for " + item.id); }
         }
 
-        status.innerText = "🔱 GENERATING FINAL ZIP...";
+        status.innerText = "🔱 PACKING ZIP...";
         const content = await zip.generateAsync({type:"blob"});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(content);
-        link.download = `G-GHOST_LOOT_${Date.now()}.zip`;
+        link.download = `GHOST_VAULT_BATCH_${Date.now()}.zip`;
         link.click();
         
-        // Move to History
-        queue.forEach(item => {
-            if(!history.some(h => h.id === item.id)) history.push(item);
-        });
-        localStorage.setItem('ghost_history_v17', JSON.stringify(history));
+        // Add to history
+        queue.forEach(item => { if(!history.includes(item.clean)) history.push(item.clean); });
+        localStorage.setItem('ghost_history_v20', JSON.stringify(history));
         
-        progress.style.display = 'none';
+        overlay.style.display = 'none';
         clearQueue();
-        renderInitialBatch();
-        alert("🔱 ALL ASSETS SECURED IN ZIP!");
+        alert("🔱 ALL ASSETS SECURED!");
     }
 
-    function clearQueue() { queue = []; document.getElementById('q-count').innerText = "0"; renderQueue(); renderInitialBatch(); }
-    function triggerSearch() { renderInitialBatch(); }
+    function clearQueue() { queue = []; document.getElementById('q-count').innerText = "0"; renderView(); }
     function toggleSearch() { 
-        const s = document.getElementById('search-box');
-        s.style.display = s.style.display === 'block' ? 'none' : 'block';
+        const s = document.getElementById('search-box'); 
+        s.style.display = s.style.display === 'none' ? 'block' : 'none'; 
+        if(s.style.display === 'block') document.getElementById('search-input').focus();
     }
     function openOverlay(id) { document.getElementById(id).style.display = 'block'; }
     function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
 
-    startReceiver();
+    setInterval(refreshData, 10000);
+    refreshData();
 </script>
 </body>
 </html>
