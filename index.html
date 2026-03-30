@@ -3,239 +3,251 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🔱 G-GHOST | TOTAL RECALL V20.0</title>
+    <title>🔱 G-GHOST | V24 VOID-STRIKE</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        :root { --yt-red: #FF0000; --bg: #0b0b0b; --card: #161616; --text: #ffffff; --neon: #42FDFC; --gold: #FFD700; --live: #00ff41; }
-        body { background: var(--bg); color: var(--text); font-family: 'Roboto', sans-serif; margin: 0; padding-bottom: 150px; overflow-x: hidden; }
+        :root { --yt-red: #FF0000; --bg: #050505; --card: #111; --text: #ffffff; --neon: #00f2ff; --gold: #FFD700; --live: #00ff41; --dead: #ff3131; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding-bottom: 100px; }
         
-        .app-bar { background: var(--bg); padding: 12px 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #222; }
-        .logo { font-size: 18px; font-weight: bold; color: var(--neon); letter-spacing: -1px; }
-        .badge { background: var(--yt-red); color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 10px; margin-left: 5px; }
+        .app-bar { background: rgba(0,0,0,0.9); padding: 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #222; backdrop-filter: blur(10px); }
+        .logo { font-size: 20px; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
         
-        #active-task-bar { background: #1a1a1a; padding: 8px 15px; border-bottom: 1px solid var(--neon); display: flex; font-size: 10px; color: var(--neon); font-weight: bold; justify-content: space-between; }
+        #active-task-bar { background: #111; padding: 10px 15px; border-bottom: 1px solid #333; display: flex; font-size: 11px; color: #888; justify-content: space-between; align-items: center; }
 
-        #video-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; padding: 10px; }
-        .video-card { position: relative; background: var(--card); border-radius: 12px; overflow: hidden; border: 2px solid #222; transition: 0.2s; cursor: pointer; }
-        .video-card.selected { border-color: var(--neon); box-shadow: 0 0 15px var(--neon); transform: scale(0.97); }
-        .is-downloaded { border-color: var(--live); }
-        .is-downloaded::before { content: "✅ LOOTED"; position: absolute; top: 5px; left: 5px; background: var(--live); color: #000; font-size: 8px; font-weight: bold; padding: 2px 5px; border-radius: 4px; z-index: 10; }
+        .control-panel { display: flex; gap: 8px; padding: 10px; overflow-x: auto; background: #000; border-bottom: 1px solid #222; }
+        .p-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 8px 15px; border-radius: 20px; font-size: 11px; white-space: nowrap; cursor: pointer; transition: 0.3s; }
+        .p-btn:active { background: var(--neon); color: #000; }
+        .btn-danger { border-color: var(--dead); color: var(--dead); }
+
+        #video-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; padding: 10px; }
+        .video-card { position: relative; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #222; }
+        .video-card.selected { border-color: var(--neon); box-shadow: 0 0 15px rgba(0,242,255,0.3); }
         
-        .thumb-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; overflow: hidden; }
+        .thumb-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; cursor: pointer; }
         .thumb-img { width: 100%; height: 100%; object-fit: cover; }
-        .video-meta { padding: 8px; font-size: 10px; color: #eee; height: 35px; overflow: hidden; line-height: 1.2; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; }
         
-        .full-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 3000; display: none; padding: 20px; box-sizing: border-box; overflow-y: auto; }
-        #progress-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.98); z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .pg-bar { width: 80%; background:#222; height:10px; border-radius:10px; overflow:hidden; margin: 20px 0; border: 1px solid #333; }
-        .pg-fill { width: 0%; height: 100%; background: var(--neon); transition: 0.4s; box-shadow: 0 0 15px var(--neon); }
+        .card-actions { position: absolute; top: 5px; right: 5px; display: flex; flex-direction: column; gap: 5px; z-index: 10; }
+        .mini-btn { background: rgba(0,0,0,0.7); color: #fff; border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+
+        .video-meta { padding: 8px; font-size: 10px; color: #aaa; height: 25px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
         
-        .btn-main { background: var(--neon); color: #000; border: none; padding: 15px; border-radius: 12px; font-weight: 900; width: 100%; cursor: pointer; text-transform: uppercase; }
-        .search-container { padding: 10px; background: #000; }
-        #search-input { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 12px; border-radius: 10px; outline: none; box-sizing: border-box; }
+        .full-overlay { position: fixed; inset: 0; background: #000; z-index: 3000; display: none; padding: 20px; overflow-y: auto; }
+        #progress-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .pg-bar { width: 70%; background:#222; height:6px; border-radius:10px; margin: 20px 0; }
+        .pg-fill { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 15px var(--neon); transition: 0.3s; }
         
-        #load-more-sentinel { text-align: center; padding: 40px; font-size: 10px; color: #444; font-weight: bold; letter-spacing: 2px; }
-        ::-webkit-scrollbar { display: none; }
+        .btn-main { background: var(--neon); color: #000; border: none; padding: 16px; border-radius: 14px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        
+        #player-modal { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; align-items: center; justify-content: center; }
+        #player-modal video { width: 100%; max-height: 80vh; }
+
+        .badge-looted { position: absolute; top: 5px; left: 5px; background: var(--live); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="app-bar">
-    <div class="logo">🔱 G-GHOST <span class="badge">TOTAL RECALL</span></div>
-    <div style="display:flex; gap:15px;">
-        <button onclick="toggleSearch()" style="background:none; border:none; color:white; font-size:20px;">🔍</button>
-        <button onclick="openOverlay('queue-overlay')" style="background:none; border:none; color:white; font-size:20px;">📥 <span id="q-count" style="font-size:12px; color:var(--neon); font-weight:bold;">0</span></button>
+    <div class="logo">🔱 G-GHOST <span style="font-size:10px; color:var(--gold)">V24 VOID-STRIKE</span></div>
+    <div style="display:flex; gap:10px;">
+        <button onclick="refreshData()" style="background:none; border:none; color:white; font-size:18px;">🔄</button>
+        <button onclick="openOverlay('queue-overlay')" style="background:var(--neon); border:none; color:black; padding:5px 12px; border-radius:8px; font-weight:bold;">QUEUE <span id="q-count">0</span></button>
     </div>
 </div>
 
 <div id="active-task-bar">
-    <span>📡 VAULT STATUS: SCANNING...</span>
-    <span id="total-count" style="color:var(--gold)">0 ASSETS</span>
+    <span id="node-stat">📡 STATUS: CONNECTED</span>
+    <span id="total-count" style="color:var(--neon)">0 ASSETS</span>
 </div>
 
-<div id="search-box" class="search-container" style="display:none;">
-    <input type="text" id="search-input" placeholder="Search prompts or IDs..." oninput="renderView()">
+<div class="control-panel">
+    <button class="p-btn" onclick="selectAll()">✅ SELECT ALL</button>
+    <button class="p-btn" onclick="clearQueue()">❌ UNSELECT ALL</button>
+    <button class="p-btn btn-danger" onclick="cleanDeadLinks()">💀 CLEAN DEAD LINKS</button>
 </div>
 
 <div id="video-feed"></div>
-<div id="load-more-sentinel">END OF DATABASE</div>
 
 <div id="progress-overlay">
-    <h2 style="color:white; letter-spacing:2px;">🔱 HARVESTING ASSETS</h2>
+    <div id="pg-percent" style="font-size:60px; font-weight:900; color:var(--neon);">0%</div>
     <div class="pg-bar"><div id="pg-fill" class="pg-fill"></div></div>
-    <div id="pg-percent" style="font-size:45px; color:var(--neon); font-weight:900;">0%</div>
-    <p id="pg-status" style="font-size:11px; color:var(--gold); font-family:monospace;"></p>
+    <p id="pg-status" style="font-size:12px; color:var(--gold); font-family:monospace;"></p>
+    <button class="btn-main" style="width:200px; background:red; color:white;" onclick="location.reload()">ABORT</button>
 </div>
 
 <div id="queue-overlay" class="full-overlay">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:1px solid #222; padding-bottom:10px;">
-        <h2 style="color:var(--neon)">Selected Loot</h2>
-        <button onclick="closeOverlay('queue-overlay')" style="background:#222; color:white; border:none; padding:10px 20px; border-radius:8px; font-weight:bold;">BACK</button>
-    </div>
-    <div id="queue-list" style="margin-bottom:20px;"></div>
-    <button class="btn-main" style="background:linear-gradient(to right, #ff8c00, #ff4500);" onclick="downloadZip()">📥 START ZIP DOWNLOAD</button>
-    <button class="btn-main" style="background:#111; color:#555; margin-top:10px; border:1px solid #222;" onclick="clearQueue()">CLEAR ALL SELECTIONS</button>
+    <h2 style="color:var(--neon)">Ready to Export</h2>
+    <div id="queue-list" style="margin-bottom:30px;"></div>
+    <button class="btn-main" onclick="downloadZipTurbo()">🚀 DOWNLOAD ZIP (SAFE MODE)</button>
+    <button class="btn-main" style="background:#222; color:white;" onclick="closeOverlay('queue-overlay')">CANCEL</button>
+</div>
+
+<div id="player-modal">
+    <button onclick="closePlayer()" style="position:absolute; top:20px; right:20px; background:white; color:black; border:none; padding:10px 20px; border-radius:30px; font-weight:900;">CLOSE</button>
+    <video id="ghost-player" controls autoplay></video>
 </div>
 
 <script>
-    const FB_URL = "https://hat-e9d2d-default-rtdb.firebaseio.com/sora_vault.json";
+    const FB_URL = "https://hat-e9d2d-default-rtdb.firebaseio.com/sora_vault";
     let masterData = [];
     let queue = [];
-    let history = JSON.parse(localStorage.getItem('ghost_history_v20')) || [];
+    let lootedHistory = JSON.parse(localStorage.getItem('ghost_looted_v24')) || [];
 
-    // 🔱 1. ULTRA-DEEP SCAN ENGINE
     async function refreshData() {
         try {
-            const res = await fetch(`${FB_URL}?nocache=${Date.now()}`);
+            const res = await fetch(`${FB_URL}.json`);
             const data = await res.json();
             if(!data) return;
-
-            let tempStore = [];
-
-            // Recursive function to find all objects that look like video data
-            function deepSearch(obj) {
+            let temp = [];
+            function traverse(obj, path = "") {
                 for (let key in obj) {
                     let item = obj[key];
+                    let curPath = path ? `${path}/${key}` : key;
                     if (item && typeof item === 'object') {
-                        // If it has a video link, it's a target
-                        if (item.clean || item.original_url || item.raw_video_url || item.original) {
-                            tempStore.push({
+                        if (item.clean || item.original_url) {
+                            temp.push({
                                 id: key,
-                                clean: item.clean || item.original_url || item.raw_video_url || item.original,
+                                dbPath: curPath,
+                                clean: item.clean || item.original_url,
                                 thumb: item.thumb || item.thumbnailUrl || '',
-                                prompt: item.prompt || item.title || 'Untitled_Ghost_Asset',
-                                time: item.timestamp || item.time || 0
+                                prompt: item.prompt || 'Untitled',
+                                time: item.timestamp || 0
                             });
-                        } else {
-                            deepSearch(item);
-                        }
+                        } else traverse(item, curPath);
                     }
                 }
             }
-
-            deepSearch(data);
-
-            // Filter duplicates by video link
-            const unique = [];
-            const map = new Map();
-            for (const item of tempStore) {
-                if(!map.has(item.clean)){
-                    map.set(item.clean, true);
-                    unique.push(item);
-                }
-            }
-
-            // Sort newest first
-            masterData = unique.sort((a,b) => b.time - a.time);
+            traverse(data);
+            masterData = temp.sort((a,b) => b.time - a.time);
             document.getElementById('total-count').innerText = masterData.length + " ASSETS";
             renderView();
-        } catch (e) { console.error("Portal Error"); }
+        } catch (e) { console.log("Refresh Failed"); }
     }
 
-    // 🔱 2. RENDER ENGINE (NO LIMITS)
     function renderView() {
-        const query = document.getElementById('search-input').value.toLowerCase();
         const feed = document.getElementById('video-feed');
-        
-        let filtered = masterData;
-        if(query) {
-            filtered = masterData.filter(i => i.prompt.toLowerCase().includes(query) || i.id.toLowerCase().includes(query));
-        }
-
         feed.innerHTML = "";
-        filtered.forEach(item => {
-            const isDone = history.includes(item.clean);
-            const isSelected = queue.some(q => q.clean === item.clean);
-            
+        masterData.forEach(item => {
+            const isSelected = queue.some(q => q.id === item.id);
+            const isLooted = lootedHistory.includes(item.id);
             const card = document.createElement('div');
-            card.className = `video-card ${isDone ? 'is-downloaded' : ''} ${isSelected ? 'selected' : ''}`;
-            card.id = `card-${item.id}`;
+            card.className = `video-card ${isSelected ? 'selected' : ''}`;
             card.innerHTML = `
-                <div class="thumb-container">
-                    <img class="thumb-img" src="${item.thumb || 'https://via.placeholder.com/300x169/111/42FDFC?text=Sora_2_Asset'}" loading="lazy">
+                <div class="thumb-container" onclick="toggleSelect('${item.id}')">
+                    <img class="thumb-img" src="${item.thumb}" loading="lazy">
+                    ${isLooted ? '<div class="badge-looted">LOOTED</div>' : ''}
+                    <div class="card-actions">
+                        <div class="mini-btn" onclick="openPlayer(event, '${item.clean}')">👁️</div>
+                    </div>
                 </div>
                 <div class="video-meta">${item.prompt}</div>
             `;
-            card.onclick = () => toggleSelect(item);
             feed.appendChild(card);
         });
     }
 
-    function toggleSelect(item) {
-        const idx = queue.findIndex(q => q.clean === item.clean);
-        if(idx > -1) {
-            queue.splice(idx, 1);
-        } else {
-            queue.push(item);
-        }
+    function toggleSelect(id) {
+        const item = masterData.find(m => m.id === id);
+        const idx = queue.findIndex(q => q.id === id);
+        if(idx > -1) queue.splice(idx, 1); else queue.push(item);
         document.getElementById('q-count').innerText = queue.length;
-        renderView(); // Refresh visual state
-        renderQueueList();
+        renderView();
     }
 
-    function renderQueueList() {
-        const list = document.getElementById('queue-list');
-        list.innerHTML = queue.map(i => `
-            <div style="background:#111; padding:10px; border-radius:8px; margin-bottom:5px; font-size:11px; border-left:3px solid var(--neon)">
-                ${i.prompt.substring(0,50)}...
-            </div>
-        `).join('');
-    }
+    function selectAll() { queue = [...masterData]; document.getElementById('q-count').innerText = queue.length; renderView(); }
+    function clearQueue() { queue = []; document.getElementById('q-count').innerText = "0"; renderView(); }
 
-    // 🔱 3. ZIP HARVESTER
-    async function downloadZip() {
+    async function downloadZipTurbo() {
         if(queue.length === 0) return;
         const zip = new JSZip();
         const overlay = document.getElementById('progress-overlay');
         const fill = document.getElementById('pg-fill');
-        const percent = document.getElementById('pg-percent');
         const status = document.getElementById('pg-status');
         
         overlay.style.display = 'flex';
         closeOverlay('queue-overlay');
 
+        let successCount = 0;
+        const batchSize = 3; // कम बैच साइज ताकि रिक्वेस्ट फेल न हो
+
         for(let i=0; i < queue.length; i++) {
-            const item = queue[i];
-            status.innerText = `FETCHING: ${i+1}/${queue.length}`;
+            status.innerText = `FETCHING (${i+1}/${queue.length}): ${queue[i].prompt.substring(0,20)}`;
+            
             try {
-                const response = await fetch(item.clean);
+                const response = await fetch(queue[i].clean);
+                if(!response.ok) throw "Error";
                 const blob = await response.blob();
-                // Clean filename
-                let safeName = item.prompt.substring(0,20).replace(/[^a-z0-9]/gi, '_').toLowerCase();
-                zip.file(`${safeName}_${i}.mp4`, blob);
-                
-                let p = Math.round(((i + 1) / queue.length) * 100);
-                fill.style.width = p + '%';
-                percent.innerText = p + '%';
-            } catch (e) { console.log("Fetch failed for " + item.id); }
+                const name = `${queue[i].prompt.substring(0,20).replace(/\s/g,'_')}_${i}.mp4`;
+                zip.file(name, blob);
+                successCount++;
+                if(!lootedHistory.includes(queue[i].id)) lootedHistory.push(queue[i].id);
+            } catch (e) {
+                console.log("Failed to fetch: " + queue[i].id);
+            }
+
+            let p = Math.round(((i+1) / queue.length) * 100);
+            fill.style.width = p + '%';
+            document.getElementById('pg-percent').innerText = p + '%';
         }
 
-        status.innerText = "🔱 PACKING ZIP...";
-        const content = await zip.generateAsync({type:"blob"});
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(content);
-        link.download = `GHOST_VAULT_BATCH_${Date.now()}.zip`;
-        link.click();
-        
-        // Add to history
-        queue.forEach(item => { if(!history.includes(item.clean)) history.push(item.clean); });
-        localStorage.setItem('ghost_history_v20', JSON.stringify(history));
-        
+        if(successCount > 0) {
+            status.innerText = "🔱 PACKING ZIP...";
+            const content = await zip.generateAsync({type:"blob"});
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `GHOST_VAULT_${Date.now()}.zip`;
+            link.click();
+            localStorage.setItem('ghost_looted_v24', JSON.stringify(lootedHistory));
+            alert(`Looted: ${successCount} assets successfully!`);
+        } else {
+            alert("No files could be downloaded. Check your internet or CORS.");
+        }
         overlay.style.display = 'none';
         clearQueue();
-        alert("🔱 ALL ASSETS SECURED!");
+        refreshData();
     }
 
-    function clearQueue() { queue = []; document.getElementById('q-count').innerText = "0"; renderView(); }
-    function toggleSearch() { 
-        const s = document.getElementById('search-box'); 
-        s.style.display = s.style.display === 'none' ? 'block' : 'none'; 
-        if(s.style.display === 'block') document.getElementById('search-input').focus();
+    // 💀 DEAD LINKS CLEANER: केवल खराब लिंक को ही डिलीट करेगा
+    async function cleanDeadLinks() {
+        if(!confirm("यह बटन पूरे डेटाबेस को स्कैन करेगा और खराब लिंक्स को डिलीट कर देगा। क्या आप तैयार हैं?")) return;
+        
+        const overlay = document.getElementById('progress-overlay');
+        const status = document.getElementById('pg-status');
+        overlay.style.display = 'flex';
+        let deadCount = 0;
+
+        for(let i=0; i < masterData.length; i++) {
+            status.innerText = `SCANNING (${i+1}/${masterData.length})...\nDEAD FOUND: ${deadCount}`;
+            try {
+                const res = await fetch(masterData[i].clean, { method: 'HEAD' });
+                if(!res.ok) throw "Dead";
+            } catch (e) {
+                deadCount++;
+                await fetch(`${FB_URL}/${masterData[i].dbPath}.json`, { method: 'DELETE' });
+            }
+        }
+        
+        overlay.style.display = 'none';
+        alert(`CLEANUP COMPLETE!\nRemoved ${deadCount} dead links.`);
+        refreshData();
     }
-    function openOverlay(id) { document.getElementById(id).style.display = 'block'; }
+
+    function openPlayer(e, url) {
+        e.stopPropagation();
+        document.getElementById('ghost-player').src = url;
+        document.getElementById('player-modal').style.display = 'flex';
+    }
+    function closePlayer() {
+        document.getElementById('ghost-player').pause();
+        document.getElementById('player-modal').style.display = 'none';
+    }
+    function openOverlay(id) { 
+        if(id==='queue-overlay') {
+            document.getElementById('queue-list').innerHTML = queue.map(i => `<div style="padding:5px; font-size:10px; border-bottom:1px solid #222;">> ${i.prompt}</div>`).join('');
+        }
+        document.getElementById(id).style.display = 'block'; 
+    }
     function closeOverlay(id) { document.getElementById(id).style.display = 'none'; }
 
-    setInterval(refreshData, 10000);
     refreshData();
 </script>
 </body>
