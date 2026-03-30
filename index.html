@@ -3,25 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🔱 G-GHOST | V24 VOID-STRIKE</title>
+    <title>🔱 G-GHOST | V25 DUAL-VOID</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        :root { --yt-red: #FF0000; --bg: #050505; --card: #111; --text: #ffffff; --neon: #00f2ff; --gold: #FFD700; --live: #00ff41; --dead: #ff3131; }
+        :root { --yt-red: #FF0000; --bg: #050505; --card: #111; --text: #ffffff; --neon: #00f2ff; --gold: #FFD700; --live: #00ff41; --dead: #ff3131; --space2: #bc13fe; }
         body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding-bottom: 100px; }
         
         .app-bar { background: rgba(0,0,0,0.9); padding: 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #222; backdrop-filter: blur(10px); }
         .logo { font-size: 20px; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
+        .logo.space-alt { color: var(--space2); text-shadow: 0 0 10px var(--space2); }
         
         #active-task-bar { background: #111; padding: 10px 15px; border-bottom: 1px solid #333; display: flex; font-size: 11px; color: #888; justify-content: space-between; align-items: center; }
 
-        .control-panel { display: flex; gap: 8px; padding: 10px; overflow-x: auto; background: #000; border-bottom: 1px solid #222; }
+        .control-panel { display: flex; gap: 8px; padding: 10px; overflow-x: auto; background: #000; border-bottom: 1px solid #222; sticky; top: 60px; z-index: 900; }
         .p-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 8px 15px; border-radius: 20px; font-size: 11px; white-space: nowrap; cursor: pointer; transition: 0.3s; }
         .p-btn:active { background: var(--neon); color: #000; }
         .btn-danger { border-color: var(--dead); color: var(--dead); }
+        .btn-space { background: #222; border-color: var(--gold); color: var(--gold); font-weight: bold; }
 
         #video-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; padding: 10px; }
-        .video-card { position: relative; background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #222; }
+        .video-card { position: relative; background: var(--card); border-radius: 12px; overflow: hidden; border: 2px solid #222; }
         .video-card.selected { border-color: var(--neon); box-shadow: 0 0 15px rgba(0,242,255,0.3); }
+        .video-card.selected.alt-mode { border-color: var(--space2); box-shadow: 0 0 15px rgba(188,19,254,0.3); }
         
         .thumb-container { width: 100%; aspect-ratio: 16/9; background: #000; position: relative; cursor: pointer; }
         .thumb-img { width: 100%; height: 100%; object-fit: cover; }
@@ -42,26 +45,28 @@
         #player-modal video { width: 100%; max-height: 80vh; }
 
         .badge-looted { position: absolute; top: 5px; left: 5px; background: var(--live); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+        .space-indicator { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #222; color: var(--gold); }
     </style>
 </head>
 <body>
 
 <div class="app-bar">
-    <div class="logo">🔱 G-GHOST <span style="font-size:10px; color:var(--gold)">V24 VOID-STRIKE</span></div>
+    <div class="logo" id="main-logo">🔱 G-GHOST <span style="font-size:10px;">V25 DUAL</span></div>
     <div style="display:flex; gap:10px;">
-        <button onclick="refreshData()" style="background:none; border:none; color:white; font-size:18px;">🔄</button>
-        <button onclick="openOverlay('queue-overlay')" style="background:var(--neon); border:none; color:black; padding:5px 12px; border-radius:8px; font-weight:bold;">QUEUE <span id="q-count">0</span></button>
+        <button onclick="switchSpace()" class="p-btn btn-space" id="space-btn">🚀 SWITCH TO BOMB</button>
+        <button onclick="openOverlay('queue-overlay')" style="background:var(--neon); border:none; color:black; padding:5px 12px; border-radius:8px; font-weight:bold;" id="queue-btn">QUEUE <span id="q-count">0</span></button>
     </div>
 </div>
 
 <div id="active-task-bar">
-    <span id="node-stat">📡 STATUS: CONNECTED</span>
-    <span id="total-count" style="color:var(--neon)">0 ASSETS</span>
+    <span id="node-stat">📡 SPACE: <span id="current-space-name" style="color:var(--neon)">HAT-VAULT</span></span>
+    <span id="total-count" style="color:var(--gold)">0 ASSETS</span>
 </div>
 
 <div class="control-panel">
     <button class="p-btn" onclick="selectAll()">✅ SELECT ALL</button>
     <button class="p-btn" onclick="clearQueue()">❌ UNSELECT ALL</button>
+    <button class="p-btn" onclick="refreshData()">🔄 REFRESH</button>
     <button class="p-btn btn-danger" onclick="cleanDeadLinks()">💀 CLEAN DEAD LINKS</button>
 </div>
 
@@ -75,42 +80,73 @@
 </div>
 
 <div id="queue-overlay" class="full-overlay">
-    <h2 style="color:var(--neon)">Ready to Export</h2>
-    <div id="queue-list" style="margin-bottom:30px;"></div>
-    <button class="btn-main" onclick="downloadZipTurbo()">🚀 DOWNLOAD ZIP (SAFE MODE)</button>
+    <h2 id="q-title" style="color:var(--neon)">Ready to Export (Hat Space)</h2>
+    <div id="queue-list" style="margin-bottom:30px; font-family: monospace; color: #888; font-size: 10px;"></div>
+    <button class="btn-main" id="dl-zip-btn" onclick="downloadZipTurbo()">🚀 DOWNLOAD ZIP (SAFE MODE)</button>
     <button class="btn-main" style="background:#222; color:white;" onclick="closeOverlay('queue-overlay')">CANCEL</button>
 </div>
 
 <div id="player-modal">
-    <button onclick="closePlayer()" style="position:absolute; top:20px; right:20px; background:white; color:black; border:none; padding:10px 20px; border-radius:30px; font-weight:900;">CLOSE</button>
+    <button onclick="closePlayer()" style="position:absolute; top:20px; right:20px; background:white; color:black; border:none; padding:10px 20px; border-radius:30px; font-weight:900; z-index:100;">CLOSE</button>
     <video id="ghost-player" controls autoplay></video>
 </div>
 
 <script>
-    const FB_URL = "https://hat-e9d2d-default-rtdb.firebaseio.com/sora_vault";
+    const SPACES = [
+        { name: "HAT-VAULT", url: "https://hat-e9d2d-default-rtdb.firebaseio.com/sora_vault", color: "#00f2ff" },
+        { name: "BOMB-VAULT", url: "https://bomb-aa638-default-rtdb.firebaseio.com", color: "#bc13fe" }
+    ];
+
+    let currentSpaceIdx = 0;
     let masterData = [];
     let queue = [];
-    let lootedHistory = JSON.parse(localStorage.getItem('ghost_looted_v24')) || [];
+    let lootedHistory = JSON.parse(localStorage.getItem('ghost_looted_v25')) || [];
+
+    function switchSpace() {
+        currentSpaceIdx = currentSpaceIdx === 0 ? 1 : 0;
+        const s = SPACES[currentSpaceIdx];
+        
+        // UI Update
+        document.getElementById('current-space-name').innerText = s.name;
+        document.getElementById('current-space-name').style.color = s.color;
+        document.getElementById('space-btn').innerText = `🚀 SWITCH TO ${currentSpaceIdx === 0 ? 'BOMB' : 'HAT'}`;
+        document.getElementById('main-logo').className = `logo ${currentSpaceIdx === 1 ? 'space-alt' : ''}`;
+        document.getElementById('queue-btn').style.background = s.color;
+        document.getElementById('dl-zip-btn').style.background = s.color;
+        document.getElementById('q-title').style.color = s.color;
+        document.getElementById('q-title').innerText = `Ready to Export (${s.name})`;
+        document.documentElement.style.setProperty('--neon', s.color);
+        
+        clearQueue();
+        refreshData();
+    }
 
     async function refreshData() {
+        const s = SPACES[currentSpaceIdx];
+        document.getElementById('total-count').innerText = "FETCHING...";
         try {
-            const res = await fetch(`${FB_URL}.json`);
+            const res = await fetch(`${s.url}.json`);
             const data = await res.json();
-            if(!data) return;
+            if(!data) {
+                masterData = [];
+                document.getElementById('total-count').innerText = "0 ASSETS";
+                renderView();
+                return;
+            }
             let temp = [];
             function traverse(obj, path = "") {
                 for (let key in obj) {
                     let item = obj[key];
                     let curPath = path ? `${path}/${key}` : key;
                     if (item && typeof item === 'object') {
-                        if (item.clean || item.original_url) {
+                        if (item.clean || item.original_url || item.url) {
                             temp.push({
                                 id: key,
                                 dbPath: curPath,
-                                clean: item.clean || item.original_url,
-                                thumb: item.thumb || item.thumbnailUrl || '',
-                                prompt: item.prompt || 'Untitled',
-                                time: item.timestamp || 0
+                                clean: item.clean || item.original_url || item.url,
+                                thumb: item.thumb || item.thumbnailUrl || 'https://via.placeholder.com/150/000/fff?text=No_Thumb',
+                                prompt: item.prompt || 'Untitled_Asset',
+                                time: item.timestamp || item.time || 0
                             });
                         } else traverse(item, curPath);
                     }
@@ -120,7 +156,10 @@
             masterData = temp.sort((a,b) => b.time - a.time);
             document.getElementById('total-count').innerText = masterData.length + " ASSETS";
             renderView();
-        } catch (e) { console.log("Refresh Failed"); }
+        } catch (e) { 
+            console.log("Refresh Failed", e); 
+            document.getElementById('total-count').innerText = "DB ERROR";
+        }
     }
 
     function renderView() {
@@ -130,10 +169,10 @@
             const isSelected = queue.some(q => q.id === item.id);
             const isLooted = lootedHistory.includes(item.id);
             const card = document.createElement('div');
-            card.className = `video-card ${isSelected ? 'selected' : ''}`;
+            card.className = `video-card ${isSelected ? 'selected' : ''} ${currentSpaceIdx === 1 ? 'alt-mode' : ''}`;
             card.innerHTML = `
                 <div class="thumb-container" onclick="toggleSelect('${item.id}')">
-                    <img class="thumb-img" src="${item.thumb}" loading="lazy">
+                    <img class="thumb-img" src="${item.thumb}" loading="lazy" onerror="this.src='https://via.placeholder.com/150/000/fff?text=Error'">
                     ${isLooted ? '<div class="badge-looted">LOOTED</div>' : ''}
                     <div class="card-actions">
                         <div class="mini-btn" onclick="openPlayer(event, '${item.clean}')">👁️</div>
@@ -167,17 +206,15 @@
         closeOverlay('queue-overlay');
 
         let successCount = 0;
-        const batchSize = 3; // कम बैच साइज ताकि रिक्वेस्ट फेल न हो
 
         for(let i=0; i < queue.length; i++) {
             status.innerText = `FETCHING (${i+1}/${queue.length}): ${queue[i].prompt.substring(0,20)}`;
-            
             try {
                 const response = await fetch(queue[i].clean);
                 if(!response.ok) throw "Error";
                 const blob = await response.blob();
-                const name = `${queue[i].prompt.substring(0,20).replace(/\s/g,'_')}_${i}.mp4`;
-                zip.file(name, blob);
+                const safeName = queue[i].prompt.substring(0,25).replace(/[^a-z0-9]/gi, '_');
+                zip.file(`${safeName}_${i}.mp4`, blob);
                 successCount++;
                 if(!lootedHistory.includes(queue[i].id)) lootedHistory.push(queue[i].id);
             } catch (e) {
@@ -194,40 +231,44 @@
             const content = await zip.generateAsync({type:"blob"});
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
-            link.download = `GHOST_VAULT_${Date.now()}.zip`;
+            link.download = `GHOST_${SPACES[currentSpaceIdx].name}_${Date.now()}.zip`;
             link.click();
-            localStorage.setItem('ghost_looted_v24', JSON.stringify(lootedHistory));
-            alert(`Looted: ${successCount} assets successfully!`);
+            localStorage.setItem('ghost_looted_v25', JSON.stringify(lootedHistory));
+            alert(`SUCCESS: ${successCount} assets looted from ${SPACES[currentSpaceIdx].name}`);
         } else {
-            alert("No files could be downloaded. Check your internet or CORS.");
+            alert("No files could be downloaded. Possible CORS issue or expired links.");
         }
         overlay.style.display = 'none';
         clearQueue();
         refreshData();
     }
 
-    // 💀 DEAD LINKS CLEANER: केवल खराब लिंक को ही डिलीट करेगा
     async function cleanDeadLinks() {
-        if(!confirm("यह बटन पूरे डेटाबेस को स्कैन करेगा और खराब लिंक्स को डिलीट कर देगा। क्या आप तैयार हैं?")) return;
+        const s = SPACES[currentSpaceIdx];
+        if(!confirm(`यह ${s.name} के सभी खराब लिंक्स को डिलीट कर देगा। क्या आप तैयार हैं?`)) return;
         
         const overlay = document.getElementById('progress-overlay');
         const status = document.getElementById('pg-status');
+        const fill = document.getElementById('pg-fill');
         overlay.style.display = 'flex';
         let deadCount = 0;
 
         for(let i=0; i < masterData.length; i++) {
-            status.innerText = `SCANNING (${i+1}/${masterData.length})...\nDEAD FOUND: ${deadCount}`;
+            status.innerText = `SCANNING ${s.name} (${i+1}/${masterData.length})\nDEAD FOUND: ${deadCount}`;
             try {
                 const res = await fetch(masterData[i].clean, { method: 'HEAD' });
                 if(!res.ok) throw "Dead";
             } catch (e) {
                 deadCount++;
-                await fetch(`${FB_URL}/${masterData[i].dbPath}.json`, { method: 'DELETE' });
+                await fetch(`${s.url}/${masterData[i].dbPath}.json`, { method: 'DELETE' });
             }
+            let p = Math.round(((i+1) / masterData.length) * 100);
+            fill.style.width = p + '%';
+            document.getElementById('pg-percent').innerText = p + '%';
         }
         
         overlay.style.display = 'none';
-        alert(`CLEANUP COMPLETE!\nRemoved ${deadCount} dead links.`);
+        alert(`CLEANUP COMPLETE: Removed ${deadCount} dead links from ${s.name}.`);
         refreshData();
     }
 
@@ -242,7 +283,7 @@
     }
     function openOverlay(id) { 
         if(id==='queue-overlay') {
-            document.getElementById('queue-list').innerHTML = queue.map(i => `<div style="padding:5px; font-size:10px; border-bottom:1px solid #222;">> ${i.prompt}</div>`).join('');
+            document.getElementById('queue-list').innerHTML = queue.map(i => `<div>> ${i.prompt}</div>`).join('');
         }
         document.getElementById(id).style.display = 'block'; 
     }
