@@ -7,22 +7,22 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root { --yt-red: #FF0000; --bg: #050505; --card: #111; --text: #ffffff; --neon: #00f2ff; --gold: #FFD700; --live: #00ff41; --dead: #ff3131; --space2: #bc13fe; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding-bottom: 100px; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', Roboto, sans-serif; margin: 0; padding-bottom: 100px; overflow-x: hidden; }
         
         .app-bar { background: rgba(0,0,0,0.9); padding: 15px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #222; backdrop-filter: blur(10px); }
-        .logo { font-size: 20px; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); }
+        .logo { font-size: 20px; font-weight: 900; color: var(--neon); text-shadow: 0 0 10px var(--neon); transition: 0.3s; }
         .logo.space-alt { color: var(--space2); text-shadow: 0 0 10px var(--space2); }
         
         #active-task-bar { background: #111; padding: 10px 15px; border-bottom: 1px solid #333; display: flex; font-size: 11px; color: #888; justify-content: space-between; align-items: center; }
 
-        .control-panel { display: flex; gap: 8px; padding: 10px; overflow-x: auto; background: #000; border-bottom: 1px solid #222; sticky; top: 60px; z-index: 900; }
+        .control-panel { display: flex; gap: 8px; padding: 10px; overflow-x: auto; background: #000; border-bottom: 1px solid #222; position: sticky; top: 60px; z-index: 900; }
         .p-btn { background: #1a1a1a; color: #fff; border: 1px solid #333; padding: 8px 15px; border-radius: 20px; font-size: 11px; white-space: nowrap; cursor: pointer; transition: 0.3s; }
         .p-btn:active { background: var(--neon); color: #000; }
         .btn-danger { border-color: var(--dead); color: var(--dead); }
         .btn-space { background: #222; border-color: var(--gold); color: var(--gold); font-weight: bold; }
 
         #video-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; padding: 10px; }
-        .video-card { position: relative; background: var(--card); border-radius: 12px; overflow: hidden; border: 2px solid #222; }
+        .video-card { position: relative; background: var(--card); border-radius: 12px; overflow: hidden; border: 2px solid #222; transition: 0.2s; }
         .video-card.selected { border-color: var(--neon); box-shadow: 0 0 15px rgba(0,242,255,0.3); }
         .video-card.selected.alt-mode { border-color: var(--space2); box-shadow: 0 0 15px rgba(188,19,254,0.3); }
         
@@ -36,16 +36,17 @@
         
         .full-overlay { position: fixed; inset: 0; background: #000; z-index: 3000; display: none; padding: 20px; overflow-y: auto; }
         #progress-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.95); z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        .pg-bar { width: 70%; background:#222; height:6px; border-radius:10px; margin: 20px 0; }
+        .pg-bar { width: 70%; background:#222; height:6px; border-radius:10px; margin: 20px 0; border: 1px solid #333; }
         .pg-fill { width: 0%; height: 100%; background: var(--neon); box-shadow: 0 0 15px var(--neon); transition: 0.3s; }
         
-        .btn-main { background: var(--neon); color: #000; border: none; padding: 16px; border-radius: 14px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; }
+        .btn-main { background: var(--neon); color: #000; border: none; padding: 16px; border-radius: 14px; font-weight: bold; width: 100%; cursor: pointer; margin-top: 10px; transition: 0.3s; }
+        .btn-main:active { transform: scale(0.98); }
         
         #player-modal { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; align-items: center; justify-content: center; }
         #player-modal video { width: 100%; max-height: 80vh; }
 
         .badge-looted { position: absolute; top: 5px; left: 5px; background: var(--live); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
-        .space-indicator { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: #222; color: var(--gold); }
+        ::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body>
@@ -54,7 +55,7 @@
     <div class="logo" id="main-logo">🔱 G-GHOST <span style="font-size:10px;">V25 DUAL</span></div>
     <div style="display:flex; gap:10px;">
         <button onclick="switchSpace()" class="p-btn btn-space" id="space-btn">🚀 SWITCH TO BOMB</button>
-        <button onclick="openOverlay('queue-overlay')" style="background:var(--neon); border:none; color:black; padding:5px 12px; border-radius:8px; font-weight:bold;" id="queue-btn">QUEUE <span id="q-count">0</span></button>
+        <button onclick="openOverlay('queue-overlay')" style="background:var(--neon); border:none; color:black; padding:5px 12px; border-radius:8px; font-weight:bold; cursor:pointer;" id="queue-btn">QUEUE <span id="q-count">0</span></button>
     </div>
 </div>
 
@@ -81,17 +82,18 @@
 
 <div id="queue-overlay" class="full-overlay">
     <h2 id="q-title" style="color:var(--neon)">Ready to Export (Hat Space)</h2>
-    <div id="queue-list" style="margin-bottom:30px; font-family: monospace; color: #888; font-size: 10px;"></div>
+    <div id="queue-list" style="margin-bottom:30px; font-family: monospace; color: #888; font-size: 11px;"></div>
     <button class="btn-main" id="dl-zip-btn" onclick="downloadZipTurbo()">🚀 DOWNLOAD ZIP (SAFE MODE)</button>
     <button class="btn-main" style="background:#222; color:white;" onclick="closeOverlay('queue-overlay')">CANCEL</button>
 </div>
 
 <div id="player-modal">
-    <button onclick="closePlayer()" style="position:absolute; top:20px; right:20px; background:white; color:black; border:none; padding:10px 20px; border-radius:30px; font-weight:900; z-index:100;">CLOSE</button>
+    <button onclick="closePlayer()" style="position:absolute; top:20px; right:20px; background:white; color:black; border:none; padding:10px 20px; border-radius:30px; font-weight:900; z-index:100; cursor:pointer;">CLOSE</button>
     <video id="ghost-player" controls autoplay></video>
 </div>
 
 <script>
+    // 🔱 CONFIG: दोनों डेटाबेस की सेटिंग्स
     const SPACES = [
         { name: "HAT-VAULT", url: "https://hat-e9d2d-default-rtdb.firebaseio.com/sora_vault", color: "#00f2ff" },
         { name: "BOMB-VAULT", url: "https://bomb-aa638-default-rtdb.firebaseio.com", color: "#bc13fe" }
@@ -102,19 +104,20 @@
     let queue = [];
     let lootedHistory = JSON.parse(localStorage.getItem('ghost_looted_v25')) || [];
 
+    // 🔱 SPACE SWITCHER LOGIC
     function switchSpace() {
         currentSpaceIdx = currentSpaceIdx === 0 ? 1 : 0;
         const s = SPACES[currentSpaceIdx];
         
-        // UI Update
+        // UI Updates
         document.getElementById('current-space-name').innerText = s.name;
         document.getElementById('current-space-name').style.color = s.color;
         document.getElementById('space-btn').innerText = `🚀 SWITCH TO ${currentSpaceIdx === 0 ? 'BOMB' : 'HAT'}`;
-        document.getElementById('main-logo').className = `logo ${currentSpaceIdx === 1 ? 'space-alt' : ''}`;
+        document.getElementById('main-logo').className = `logo \${currentSpaceIdx === 1 ? 'space-alt' : ''}`;
         document.getElementById('queue-btn').style.background = s.color;
         document.getElementById('dl-zip-btn').style.background = s.color;
         document.getElementById('q-title').style.color = s.color;
-        document.getElementById('q-title').innerText = `Ready to Export (${s.name})`;
+        document.getElementById('q-title').innerText = `Ready to Export (\${s.name})`;
         document.documentElement.style.setProperty('--neon', s.color);
         
         clearQueue();
@@ -123,13 +126,13 @@
 
     async function refreshData() {
         const s = SPACES[currentSpaceIdx];
-        document.getElementById('total-count').innerText = "FETCHING...";
+        document.getElementById('total-count').innerText = "CONNECTING...";
         try {
-            const res = await fetch(`${s.url}.json`);
+            const res = await fetch(\`\${s.url}.json?nocache=\${Date.now()}\`);
             const data = await res.json();
             if(!data) {
                 masterData = [];
-                document.getElementById('total-count').innerText = "0 ASSETS";
+                document.getElementById('total-count').innerText = "EMPTY SPACE";
                 renderView();
                 return;
             }
@@ -137,7 +140,7 @@
             function traverse(obj, path = "") {
                 for (let key in obj) {
                     let item = obj[key];
-                    let curPath = path ? `${path}/${key}` : key;
+                    let curPath = path ? \`\${path}/\${key}\` : key;
                     if (item && typeof item === 'object') {
                         if (item.clean || item.original_url || item.url) {
                             temp.push({
@@ -157,8 +160,8 @@
             document.getElementById('total-count').innerText = masterData.length + " ASSETS";
             renderView();
         } catch (e) { 
-            console.log("Refresh Failed", e); 
-            document.getElementById('total-count').innerText = "DB ERROR";
+            console.log("DB Error:", e);
+            document.getElementById('total-count').innerText = "CONNECTION FAILED";
         }
     }
 
@@ -169,17 +172,17 @@
             const isSelected = queue.some(q => q.id === item.id);
             const isLooted = lootedHistory.includes(item.id);
             const card = document.createElement('div');
-            card.className = `video-card ${isSelected ? 'selected' : ''} ${currentSpaceIdx === 1 ? 'alt-mode' : ''}`;
-            card.innerHTML = `
-                <div class="thumb-container" onclick="toggleSelect('${item.id}')">
-                    <img class="thumb-img" src="${item.thumb}" loading="lazy" onerror="this.src='https://via.placeholder.com/150/000/fff?text=Error'">
-                    ${isLooted ? '<div class="badge-looted">LOOTED</div>' : ''}
+            card.className = \`video-card \${isSelected ? 'selected' : ''} \${currentSpaceIdx === 1 ? 'alt-mode' : ''}\`;
+            card.innerHTML = \`
+                <div class="thumb-container" onclick="toggleSelect('\${item.id}')">
+                    <img class="thumb-img" src="\${item.thumb}" loading="lazy" onerror="this.src='https://via.placeholder.com/150/000/fff?text=Error'">
+                    \${isLooted ? '<div class="badge-looted">LOOTED</div>' : ''}
                     <div class="card-actions">
-                        <div class="mini-btn" onclick="openPlayer(event, '${item.clean}')">👁️</div>
+                        <div class="mini-btn" onclick="openPlayer(event, '\${item.clean}')">👁️</div>
                     </div>
                 </div>
-                <div class="video-meta">${item.prompt}</div>
-            `;
+                <div class="video-meta">\${item.prompt}</div>
+            \`;
             feed.appendChild(card);
         });
     }
@@ -208,17 +211,17 @@
         let successCount = 0;
 
         for(let i=0; i < queue.length; i++) {
-            status.innerText = `FETCHING (${i+1}/${queue.length}): ${queue[i].prompt.substring(0,20)}`;
+            status.innerText = \`FETCHING (\${i+1}/\${queue.length}): \${queue[i].prompt.substring(0,20)}\`;
             try {
                 const response = await fetch(queue[i].clean);
-                if(!response.ok) throw "Error";
+                if(!response.ok) throw "Dead";
                 const blob = await response.blob();
                 const safeName = queue[i].prompt.substring(0,25).replace(/[^a-z0-9]/gi, '_');
-                zip.file(`${safeName}_${i}.mp4`, blob);
+                zip.file(\`\${safeName}_\${i}.mp4\`, blob);
                 successCount++;
                 if(!lootedHistory.includes(queue[i].id)) lootedHistory.push(queue[i].id);
             } catch (e) {
-                console.log("Failed to fetch: " + queue[i].id);
+                console.log("Fetch Error on:", queue[i].id);
             }
 
             let p = Math.round(((i+1) / queue.length) * 100);
@@ -231,12 +234,12 @@
             const content = await zip.generateAsync({type:"blob"});
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
-            link.download = `GHOST_${SPACES[currentSpaceIdx].name}_${Date.now()}.zip`;
+            link.download = \`GHOST_\${SPACES[currentSpaceIdx].name}_\${Date.now()}.zip\`;
             link.click();
             localStorage.setItem('ghost_looted_v25', JSON.stringify(lootedHistory));
-            alert(`SUCCESS: ${successCount} assets looted from ${SPACES[currentSpaceIdx].name}`);
+            alert(\`DONE: \${successCount} files secured!\`);
         } else {
-            alert("No files could be downloaded. Possible CORS issue or expired links.");
+            alert("No files could be downloaded. All selected links appear dead or CORS blocked.");
         }
         overlay.style.display = 'none';
         clearQueue();
@@ -245,7 +248,7 @@
 
     async function cleanDeadLinks() {
         const s = SPACES[currentSpaceIdx];
-        if(!confirm(`यह ${s.name} के सभी खराब लिंक्स को डिलीट कर देगा। क्या आप तैयार हैं?`)) return;
+        if(!confirm(\`क्या आप पक्का \${s.name} के डेड लिंक्स हटाना चाहते हैं?\`)) return;
         
         const overlay = document.getElementById('progress-overlay');
         const status = document.getElementById('pg-status');
@@ -254,13 +257,13 @@
         let deadCount = 0;
 
         for(let i=0; i < masterData.length; i++) {
-            status.innerText = `SCANNING ${s.name} (${i+1}/${masterData.length})\nDEAD FOUND: ${deadCount}`;
+            status.innerText = \`SCANNING \${s.name} (\${i+1}/\${masterData.length})\\nFOUND: \${deadCount}\`;
             try {
                 const res = await fetch(masterData[i].clean, { method: 'HEAD' });
                 if(!res.ok) throw "Dead";
             } catch (e) {
                 deadCount++;
-                await fetch(`${s.url}/${masterData[i].dbPath}.json`, { method: 'DELETE' });
+                await fetch(\`\${s.url}/\${masterData[i].dbPath}.json\`, { method: 'DELETE' });
             }
             let p = Math.round(((i+1) / masterData.length) * 100);
             fill.style.width = p + '%';
@@ -268,7 +271,7 @@
         }
         
         overlay.style.display = 'none';
-        alert(`CLEANUP COMPLETE: Removed ${deadCount} dead links from ${s.name}.`);
+        alert(\`CLEANUP FINISHED: \${deadCount} dead links purged from \${s.name}.\`);
         refreshData();
     }
 
@@ -283,7 +286,7 @@
     }
     function openOverlay(id) { 
         if(id==='queue-overlay') {
-            document.getElementById('queue-list').innerHTML = queue.map(i => `<div>> ${i.prompt}</div>`).join('');
+            document.getElementById('queue-list').innerHTML = queue.map(i => \`<div>> \${i.prompt}</div>\`).join('');
         }
         document.getElementById(id).style.display = 'block'; 
     }
