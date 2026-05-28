@@ -3,38 +3,382 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Skeuomorphic Time-Lock Vault</title>
+    <title>Skeuomorphic Multi-Vault Time-Lock Chest</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=Orbitron:wght@400;600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+
     <style>
-        /* Skeuomorphic Metal Styling & Textures */
+        /* Custom Skeuomorphic & Industrial Styling */
         body {
-            background: radial-gradient(circle, #2c3e50 0%, #0f171e 100%);
-            font-family: 'Courier New', Courier, monospace;
+            background: radial-gradient(circle at center, #2c3539 0%, #111618 100%);
+            font-family: 'Share Tech Mono', monospace;
+            color: #e2e8f0;
         }
-        .heavy-metal {
-            background: linear-gradient(135deg, #434343 0%, #1a1a1a 100%);
-            border: 4px solid #555;
-            box-shadow: 
-                inset 0 4px 10px rgba(255,255,255,0.2),
-                inset 0 -4px 10px rgba(0,0,0,0.8),
-                0 25px 50px -12px rgba(0, 0, 0, 0.9);
-            border-radius: 12px;
+
+        /* Heavy Steel Vault Panel Style */
+        .vault-panel {
+            background: linear-gradient(145deg, #2a3135, #1a1e21);
+            border: 4px solid #3a444a;
+            box-shadow: inset 0 4px 10px rgba(255,255,255,0.05), 
+                        0 25px 50px -12px rgba(0, 0, 0, 0.7);
             position: relative;
         }
-        .metal-plate {
-            background: linear-gradient(180deg, #2b2b2b 0%, #141414 100%);
-            border: 2px solid #3a3a3a;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5), 0 2px 2px rgba(255,255,255,0.1);
+
+        .vault-panel::before {
+            content: '';
+            position: absolute;
+            top: 2px; left: 2px; right: 2px; bottom: 2px;
+            border: 1px solid #14171a;
+            pointer-events: none;
         }
+
+        /* Metallic Structural Elements */
+        .metallic-card {
+            background: linear-gradient(135deg, #323b41 0%, #1e2428 100%);
+            border: 2px solid #4a5760;
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.1),
+                        inset 0 -2px 4px rgba(0,0,0,0.4),
+                        0 8px 16px rgba(0,0,0,0.5);
+            position: relative;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .metallic-card:active:not(.no-press) {
+            transform: translateY(2px);
+            box-shadow: inset 0 4px 6px rgba(0,0,0,0.6),
+                        0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Tactile Industrial Buttons */
+        .btn-metallic-primary {
+            background: linear-gradient(180deg, #4b5861 0%, #293238 100%);
+            border: 2px solid #5d6d78;
+            box-shadow: 0 4px 0 #1b2124, 0 6px 10px rgba(0,0,0,0.5);
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+            transition: all 0.1s ease;
+        }
+
+        .btn-metallic-primary:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 #1b2124, 0 2px 4px rgba(0,0,0,0.7);
+        }
+
+        .btn-metallic-danger {
+            background: linear-gradient(180deg, #c53030 0%, #742a2a 100%);
+            border: 2px solid #e53e3e;
+            box-shadow: 0 4px 0 #4a1d1d, 0 6px 10px rgba(0,0,0,0.5);
+            text-shadow: 0 -1px 0 rgba(0,0,0,0.5);
+            transition: all 0.1s ease;
+        }
+
+        .btn-metallic-danger:active {
+            transform: translateY(4px);
+            box-shadow: 0 0px 0 #4a1d1d, 0 2px 4px rgba(0,0,0,0.7);
+        }
+
+        /* Nixie / Industrial LED Screen Display */
+        .led-display {
+            background-color: #0d0f10;
+            border: 3px inset #1e2428;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: inset 0 4px 10px rgba(0,0,0,0.9);
+        }
+
+        .led-glow-locked {
+            color: #ff5500;
+            text-shadow: 0 0 10px rgba(255, 85, 0, 0.75), 0 0 20px rgba(255, 85, 0, 0.5);
+        }
+
+        .led-glow-unlocked {
+            color: #00ff66;
+            text-shadow: 0 0 10px rgba(0, 255, 102, 0.75), 0 0 20px rgba(0, 255, 102, 0.5);
+        }
+
+        /* Rivet details for skeuomorphic depth */
         .rivet {
             width: 8px;
             height: 8px;
-            background: radial-gradient(circle, #888 0%, #333 100%);
+            background: linear-gradient(135deg, #6b7280, #374151);
             border-radius: 50%;
-            box-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+            box-shadow: inset 1px 1px 1px rgba(255,255,255,0.4), 1px 1px 2px rgba(0,0,0,0.8);
+            position: absolute;
         }
-        .led-indicator {
+
+        /* Custom Scrollbar for heavy UI feel */
+        ::-webkit-scrollbar {
             width: 12px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #14171a;
+            box-shadow: inset 0 0 6px rgba(0,0,0,0.6);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #323b41;
+            border: 2px solid #14171a;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8 flex flex-col justify-between">
+
+    <header class="w-full max-w-7xl mx-auto mb-6 vault-panel p-4 flex flex-col sm:flex-row justify-between items-center rounded-lg">
+        <div class="rivet top-2 left-2"></div>
+        <div class="rivet top-2 right-2"></div>
+        <div class="rivet bottom-2 left-2"></div>
+        <div class="rivet bottom-2 right-2"></div>
+
+        <div class="flex items-center space-x-4">
+            <div class="w-4 h-4 rounded-full bg-green-500 animate-pulse shadow-[0_0_10px_#22c55e]"></div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-black tracking-widest text-slate-100 uppercase font-mono">CORE VAULT MONITOR</h1>
+                <p class="text-xs text-slate-400 font-mono">SECURE TIME-LOCK INFRASTRUCTURE • STATUS: OPERATIONAL</p>
+            </div>
+        </div>
+        <div class="mt-4 sm:mt-0 px-4 py-2 led-display rounded text-right">
+            <span class="text-xs block text-slate-500 font-bold uppercase tracking-widest">SYSTEM TIME (LOCAL)</span>
+            <span id="system-clock" class="text-emerald-400 font-mono tracking-wider font-bold text-lg">0000-00-00 00:00:00</span>
+        </div>
+    </header>
+
+    <main class="w-full max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8 flex-grow items-start">
+        
+        <section class="vault-panel rounded-xl p-6 lg:col-span-1 h-full flex flex-col justify-between relative">
+            <div class="rivet top-3 left-3"></div>
+            <div class="rivet top-3 right-3"></div>
+            <div class="rivet bottom-3 left-3"></div>
+            <div class="rivet bottom-3 right-3"></div>
+
+            <div>
+                <div class="border-b-2 border-slate-700 pb-3 mb-6">
+                    <h2 class="text-lg font-bold text-slate-300 flex items-center gap-2 tracking-wider">
+                        <span>⚡</span> INGESTION TERMINAL
+                    </h2>
+                </div>
+
+                <form id="vault-form" class="space-y-5">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Secure Payload Data</label>
+                        <textarea id="payload-text" required rows="5" class="w-full p-3 bg-slate-950 border-2 border-slate-700 rounded text-slate-200 font-mono text-sm focus:outline-none focus:border-amber-500 placeholder-slate-600 shadow-inner" placeholder="Enter sensitive credentials, structural guidelines, or master keys here..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Release Target Coordinates (Date & Time)</label>
+                        <input id="unlock-datetime" type="datetime-local" required class="w-full p-3 bg-slate-950 border-2 border-slate-700 rounded text-slate-200 font-mono text-sm focus:outline-none focus:border-amber-500 shadow-inner">
+                    </div>
+
+                    <div class="flex items-center justify-between p-3 bg-slate-900/60 border border-slate-800 rounded">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-300">Repetitive Lock Module</label>
+                            <span class="text-[10px] text-slate-500 block font-mono">Auto-renews duration sequence upon expiration</span>
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input id="repeat-toggle" type="checkbox" class="sr-only peer">
+                            <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="w-full py-3 px-4 rounded text-sm font-black tracking-widest uppercase btn-metallic-primary text-slate-200">
+                        Initialize & Commit Chest
+                    </button>
+                </form>
+            </div>
+
+            <div class="mt-8 pt-4 border-t border-slate-800 text-[11px] font-mono text-slate-500 space-y-1">
+                <p>• Cryptographic verification matches localized timestamp criteria.</p>
+                <p>• Early structural circumvention commands initialize permanent content purging sequence.</p>
+            </div>
+        </section>
+
+        <section class="vault-panel rounded-xl p-6 lg:col-span-2 min-h-[600px] flex flex-col relative">
+            <div class="rivet top-3 left-3"></div>
+            <div class="rivet top-3 right-3"></div>
+            <div class="rivet bottom-3 left-3"></div>
+            <div class="rivet bottom-3 right-3"></div>
+
+            <div class="border-b-2 border-slate-700 pb-3 mb-6 flex justify-between items-center">
+                <h2 class="text-lg font-bold text-slate-300 flex items-center gap-2 tracking-wider">
+                    <span>🗄️</span> CHASSIS ARRAY ARRAY DESK
+                </h2>
+                <span id="vault-count-badge" class="px-2 py-0.5 bg-slate-950 border border-slate-700 text-xs font-mono font-bold text-amber-500 rounded">0 CHESTS MOUNTED</span>
+            </div>
+
+            <div id="vaults-container" class="grid grid-cols-1 md:grid-cols-2 gap-6 overflow-y-auto flex-grow max-h-[650px] pr-2">
+                <div id="empty-state" class="col-span-full flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-slate-800 rounded-lg bg-slate-900/20">
+                    <span class="text-4xl mb-4 opacity-40">📥</span>
+                    <h3 class="text-slate-400 font-bold uppercase tracking-wider text-sm">No Core Assets Tracked</h3>
+                    <p class="text-slate-600 text-xs max-w-xs mt-1 font-mono">Deploy a secure chest matrix using the Ingestion Terminal to establish real-time parameter tracking loops.</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <div id="danger-modal-overlay" class="fixed inset-0 bg-black/85 backdrop-blur-md hidden items-center justify-center z-50 p-4 transition-all duration-300">
+        <div class="vault-panel w-full max-w-md p-6 rounded-xl border-4 border-red-900 shadow-[0_0_50px_rgba(220,38,38,0.3)] relative">
+            <div class="rivet top-3 left-3 bg-red-700"></div>
+            <div class="rivet top-3 right-3 bg-red-700"></div>
+            <div class="rivet bottom-3 left-3 bg-red-700"></div>
+            <div class="rivet bottom-3 right-3 bg-red-700"></div>
+
+            <div class="flex items-center justify-center space-x-3 text-red-500 mb-6 animate-pulse">
+                <span class="text-2xl font-black">⚠️</span>
+                <h3 id="modal-title-step" class="text-xl font-black font-mono tracking-widest uppercase">CRITICAL SYSTEM OVERRIDE</h3>
+                <span class="text-2xl font-black">⚠️</span>
+            </div>
+
+            <div class="bg-slate-950 p-4 rounded border border-red-900/60 mb-6 text-center shadow-inner">
+                <p id="modal-body-text" class="font-mono text-sm tracking-wide text-red-400 leading-relaxed font-bold">
+                    Initializing Early Structural Breach Procedures...
+                </p>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button id="modal-confirm-btn" class="w-full py-3 rounded text-xs font-black tracking-widest uppercase btn-metallic-danger text-slate-100">
+                    CONFIRM & FORWARD TO STEP 2
+                </button>
+                <button id="modal-cancel-btn" class="w-full py-2 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded text-xs font-mono tracking-wider font-bold text-slate-300 transition-colors">
+                    ABORT IMMINENT PURGE RECOVERY
+                </button>
+            </div>
+
+            <div class="mt-6 flex justify-center items-center space-x-4">
+                <div id="indicator-1" class="h-2 w-10 border border-red-900 rounded bg-slate-900"></div>
+                <div id="indicator-2" class="h-2 w-10 border border-red-900 rounded bg-slate-900"></div>
+                <div id="indicator-3" class="h-2 w-10 border border-red-900 rounded bg-slate-900"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="w-full max-w-7xl mx-auto mt-6 text-center text-[10px] font-mono text-slate-600 tracking-wider">
+        SKEUOMORPHIC PROTOCOL V4.9.2 • SYSTEM RESPONSIVE DEPLOYMENT ENGINE • SECURE ENDPOINT SYNCHRONIZATION VIA FIREBASE REALTIME DISTRIBUTED DATABASE
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, set, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+        // Verified Master Firebase Target Parameter Settings Object Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAyz-AK7K9GWAZxIVLVvoU8oGFhCnw68Dg",
+            authDomain: "bhakti-b05cc.firebaseapp.com",
+            projectId: "bhakti-b05cc",
+            storageBucket: "bhakti-b05cc.firebasestorage.app",
+            messagingSenderId: "836660688432",
+            appId: "1:836660688432:web:66f4a0d19e2b50d64a9ff5",
+            measurementId: "G-QSCRBF40ZN"
+        };
+
+        // Initialize Structural Context Realtime Application Node References
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const vaultsRef = ref(db, 'vaults');
+
+        // Internal State Management Dictionary Cache Array Lookups
+        let activeVaultsDataSet = {};
+        let trackingDeletionTargetNodeID = null;
+        let diagnosticModalCurrentStepLevel = 1;
+
+        // UI Element Reference Mappings
+        const systemClockDisplay = document.getElementById('system-clock');
+        const vaultForm = document.getElementById('vault-form');
+        const vaultsContainer = document.getElementById('vaults-container');
+        const emptyStateFallbackElement = document.getElementById('empty-state');
+        const vaultCountBadge = document.getElementById('vault-count-badge');
+
+        // Modal Specific Element Reference DOM Mappings
+        const dangerModalOverlay = document.getElementById('danger-modal-overlay');
+        const modalTitleStepText = document.getElementById('modal-title-step');
+        const modalBodyText = document.getElementById('modal-body-text');
+        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        const indicatorOne = document.getElementById('indicator-1');
+        const indicatorTwo = document.getElementById('indicator-2');
+        const indicatorThree = document.getElementById('indicator-3');
+
+        // System-wide Global Timekeeper Clock Realtime Loop Execution Block
+        function executeSystemClockUpdateLoop() {
+            const currentLocalDateObject = new Date();
+            const yearStr = currentLocalDateObject.getFullYear();
+            const monthStr = String(currentLocalDateObject.getMonth() + 1).padStart(2, '0');
+            const dayStr = String(currentLocalDateObject.getDate()).padStart(2, '0');
+            const hoursStr = String(currentLocalDateObject.getHours()).padStart(2, '0');
+            const minutesStr = String(currentLocalDateObject.getMinutes()).padStart(2, '0');
+            const secondsStr = String(currentLocalDateObject.getSeconds()).padStart(2, '0');
+            
+            systemClockDisplay.textContent = `${yearStr}-${monthStr}-${dayStr} ${hoursStr}:${minutesStr}:${secondsStr}`;
+        }
+        setInterval(executeSystemClockUpdateLoop, 1000);
+        executeSystemClockUpdateLoop();
+
+        // Handle Realtime Input Data Submissions
+        vaultForm.addEventListener('submit', (eventExecutionObj) => {
+            eventExecutionObj.preventDefault();
+            
+            const rawTextPayloadInputData = document.getElementById('payload-text').value;
+            const chosenUnlockTargetDatetimeString = document.getElementById('unlock-datetime').value;
+            const repeatMechanismConfigurationState = document.getElementById('repeat-toggle').checked;
+
+            // Map and compile object architecture payloads
+            const newVaultDatabaseNodeReference = push(vaultsRef);
+            set(newVaultDatabaseNodeReference, {
+                id: newVaultDatabaseNodeReference.key,
+                payload: rawTextPayloadInputData,
+                targetUnlockTimestamp: new Date(chosenUnlockTargetDatetimeString).getTime(),
+                repeatModeActivated: repeatMechanismConfigurationState,
+                initializedTimestamp: Date.now()
+            }).then(() => {
+                vaultForm.reset();
+            }).catch((databaseRuntimeErrorInstance) => {
+                console.error("Data Write Failure Instance Encountered: ", databaseRuntimeErrorInstance);
+            });
+        });
+
+        // Realtime Synchronous Listener Interface Tracking System
+        onValue(vaultsRef, (databaseDataSnapshotInstance) => {
+            const realTimeExtractedNodeDataset = databaseDataSnapshotInstance.val();
+            
+            if (!realTimeExtractedNodeDataset) {
+                activeVaultsDataSet = {};
+                renderTargetVaultInterfaceArrays();
+                return;
+            }
+            
+            activeVaultsDataSet = realTimeExtractedNodeDataset;
+            renderTargetVaultInterfaceArrays();
+        });
+
+        // Loop execution engine generating UI elements dynamically
+        function renderTargetVaultInterfaceArrays() {
+            const vaultNodeKeyKeysArray = Object.keys(activeVaultsDataSet);
+            const totalMountedVaultCount = vaultNodeKeyKeysArray.length;
+
+            vaultCountBadge.textContent = `${totalMountedVaultCount} ${totalMountedVaultCount === 1 ? 'CHEST' : 'CHESTS'} MOUNTED`;
+
+            // Clear present UI nodes parsing safety constraints
+            vaultsContainer.innerHTML = '';
+
+            if (totalMountedVaultCount === 0) {
+                vaultsContainer.appendChild(emptyStateFallbackElement);
+                return;
+            }
+
+            vaultNodeKeyKeysArray.forEach((nodeIterationUniqueKeyId) => {
+                const individualVaultRecordData = activeVaultsDataSet[nodeIterationUniqueKeyId];
+                const individualGeneratedCardDOMElement = createSkeuomorphicVaultCardNode(individualVaultRecordData);
+                vaultsContainer.appendChild(individualGeneratedCardDOMElement);
+            });
+        }
+
+        // Generate custom HTML blocks mimicking rigid metal locked storage chests
+        function createSkeuomorphicVaultCardNode(vaultContextParameterObject) {
+            const rootContainerDivWrapperElement = document.createElement('div');
+            rootContainerDivWrapperElement.className = "metallic-card no-press rounded-lg p-5 flex flex-col justify-between border-2 relative overflow-hidden";
+            rootContainerDivWrapperElement.id = `vault-card-${vaultContextParameterObject.id}`;
+
+            // Attach localized layout safety structural accents
+            rootContainerDivWrapperElement.innerHTML = `
+                <div class="rivet top-2 left-2">            width: 12px;
             height: 12px;
             border-radius: 50%;
             box-shadow: 0 0 8px rgba(0,0,0,0.5);
